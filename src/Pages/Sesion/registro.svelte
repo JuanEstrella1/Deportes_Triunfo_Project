@@ -70,6 +70,13 @@
           navigate("/");
         }),5000)
       })
+      .catch(error =>{
+        alert(error.message)
+        correo = ""
+        nombre =""
+        contraseña = ""
+        apellido = ""
+      } )
       .catch(error => console.error("No se pudo registrar al usuario"))
     }
   };

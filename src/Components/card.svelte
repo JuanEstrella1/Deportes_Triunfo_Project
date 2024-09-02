@@ -1,21 +1,30 @@
 <script>
   // importacion de herramientas
-  import {ventana_Modal_pago_rapido,producto_compra} from "../Apis/storage"
+  import { getAuth } from "firebase/auth";
+  import {ventana_Modal_pago_rapido,producto_compra,ventana_modal_login} from "../Apis/storage"
 
   //importacion de componentes
   import ModalCompras from "../Components/pagos_rapidos.svelte"
+  import ModalLogin from "../Components/loginModal.svelte"
 
 
 
   //variables
   export let productos;
   let imagenes = [];
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   $: imagenes = productos.imagenes;
   // funcion para abrir ventana modal
   const abrirModal = () =>{
-    $ventana_Modal_pago_rapido = true;
-    $producto_compra = productos
+    if (user) {
+      $ventana_Modal_pago_rapido = true;
+      $producto_compra = productos
+    }else{
+      $ventana_modal_login = true
+    }
+    
   } 
 
 </script>

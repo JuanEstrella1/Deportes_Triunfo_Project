@@ -20,7 +20,8 @@
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.1.2",
     "svelte": "^3.59.2",
-    "svelte-routing": "^2.13.0"
+    "svelte-routing": "^2.13.0",
+    "vercel": "^37.2.1"
   },
   "dependencies": {
     "@splidejs/splide": "^4.1.4",

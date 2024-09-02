@@ -6,7 +6,8 @@
   import SliderCards from "../../secciones/sliderCards.svelte";
   import ModalCompras from "../../Components/pagos_rapidos.svelte"
   import ModalLogin from "../../Components/loginModal.svelte"
-  
+/*   alert("Para poder acceder a las funciones de usuario, se recomienda crear una cuenta personal desde la seccion de registrar usuario, posteriormente autenticar la cuenta desde el correo recibido en la bandeja de entrada o spam de tu propio correo, una vez la cuenta este autenticada puedes iniciar seción con la contraseña y correo registrado y asi poder acceder a las funciones de usuario.")
+ */  
 
 
 

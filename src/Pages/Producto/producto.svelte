@@ -2,8 +2,10 @@
   // importacion de componentes
   import SliderCards from "../../secciones/sliderCards.svelte";
   import ModalCompras from "../../Components/pagos_rapidos.svelte";
+  import ModalLogin from "../../Components/loginModal.svelte"
 
   // importacion de herramientas
+  import { getAuth } from "firebase/auth";
   import {
     leer_documento,
     actualizar_Documento,
@@ -12,7 +14,9 @@
   import {
     ventana_Modal_pago_rapido,
     producto_compra,
-    variable_favoritos
+    variable_favoritos,
+    ventana_modal_login,
+    contador
   } from "../../Apis/storage";
   import { onMount } from "svelte";
 
@@ -116,47 +120,43 @@
 
   // funcion para agregar a carrito
   const agregar_carrito = async () => {
-    if (usuarioActivo.carrito.length > 0) {
-      /* 
-      usuarioActivo.favoritos = [...usuarioActivo.favoritos,producto] */
-      /* actualizar_Documento("usuarios",{favoritos:[...usuarioActivo.favoritos,producto]},usuarioActivo.id) */
-      const data = JSON.parse(localStorage.getItem(usuarioActivo.key));
+    //obtencion de datos locales
+    const data = JSON.parse(localStorage.getItem(usuarioActivo.key));
 
-      // Actualizacion de datos
-      data.carrito = [...data.carrito, {...producto,cantidadCompra:cantidadCompra}];
+      let index = data.carrito.findIndex(
+        (element) => element.id === $producto_compra.id
+      );
+       if (index === -1) {
+        // Actualizacion de datos
+        data.carrito = [
+          ...data.carrito,
+          { ...$producto_compra, cantidadCompra: cantidadCompra },
+        ];
+
+        // conversion de datos
+        const dataActualizada = JSON.stringify(data);
+        $contador = data.carrito.length;
+        // Actualizacion de datos completos
+        localStorage.setItem(usuarioActivo.key, dataActualizada);
+
+        //actualizacion en la base de datos
+        actualizar_Documento("usuarios", { carrito: data.carrito }, data.id);
       
-
-      // conversion de datos
-      const dataActualizada = JSON.stringify(data);
-
-      // Actualizacion de datos completos
-      localStorage.setItem(usuarioActivo.key, dataActualizada);
-
-      //actualizacion en la base de datos
-      actualizar_Documento("usuarios", { carrito: data.carrito }, data.id);
-    } else {
-      usuarioActivo.carrito = [producto];
-      const data = JSON.parse(localStorage.getItem(usuarioActivo.key));
-
-      // Actualizacion de datos
-      data.carrito = [...data.carrito, producto];
-
-      // conversion de datos
-      const dataActualizada = JSON.stringify(data);
-
-      // Actualizacion de datos completos
-      localStorage.setItem(usuarioActivo.key, dataActualizada);
-
-      //actualizacion en la base de datos
-      actualizar_Documento("usuarios", { carrito: data.carrito }, data.id);
-    }
+    } 
   };
 
   //funcion para abrir modal
   const abrirModal = () => {
-    $ventana_Modal_pago_rapido = true;
-    $producto_compra = producto;
-    agregar_carrito();
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      $ventana_Modal_pago_rapido = true;
+      $producto_compra = producto;
+      agregar_carrito();
+    }else{
+      $ventana_modal_login = true;
+    }
+    
   };
 
    //variables auxiliares
@@ -168,16 +168,7 @@ setTimeout((() => variable_timer = true),1500);
     await keyLocalStorage().then((key) => {
       usuarioActivo = { ...JSON.parse(localStorage.getItem(key)), key: key };
     });
-    // individualizacion del id para busqueda especifica
-    pathname = window.location.pathname.split("/")[2];
-
-    // Busqueda del producto especifico en la base de datos
-    producto = await leer_documento("productos", pathname);
-
-    imagenes = producto.imagenes;
-
-    // definicion de variable para los sliders
-    variable = true;
+    
 
     // Encontrar si el producto ya se encuentra en la lista de favoritos
     const index = usuarioActivo.favoritos.findIndex((obj) => obj.id === producto.id);
@@ -190,6 +181,18 @@ setTimeout((() => variable_timer = true),1500);
     );
     console.log(index)
   })();
+  onMount(async()=>{
+    // individualizacion del id para busqueda especifica
+    pathname = window.location.pathname.split("/")[2];
+
+    // Busqueda del producto especifico en la base de datos
+    producto = await leer_documento("productos", pathname);
+
+    imagenes = producto.imagenes;
+
+    // definicion de variable para los sliders
+    variable = true;
+  })
 
 </script>
 {#if variable_timer}
@@ -269,6 +272,7 @@ setTimeout((() => variable_timer = true),1500);
 {#if $ventana_Modal_pago_rapido}
   <ModalCompras {cantidadCompra} />
 {/if}
+<ModalLogin />
 
 
 
